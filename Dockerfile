@@ -1,20 +1,11 @@
 
-FROM maven:3.8.4-jdk-8 AS build
-
-COPY src /app/src
-COPY pom.xml /app
-
-WORKDIR /app
-RUN mvn clean install
-
-FROM openjdk:8-jre-alpine
-
-COPY --from=build /app/target/microservice-1.0.0.jar /app/microservice.jar
-
-WORKDIR /app
-
-EXPOSE 8080
-
-CMD ["java", "-jar", "microservice.jar"]
+FROM openjdk:8-jdk-alpine
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
+ARG DEPENDENCY=target/dependency
+COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
+COPY ${DEPENDENCY}/META-INF /app/META-INF
+COPY ${DEPENDENCY}/BOOT-INF/classes /app
+ENTRYPOINT ["java","-cp","app:app/lib/*","microservice.Microservice"]
 
 
